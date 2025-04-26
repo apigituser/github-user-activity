@@ -1,1 +1,1 @@
-Github User Activity Summariser
+Github User Activity (In-Progress)
