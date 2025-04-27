@@ -18,13 +18,20 @@ def parse_data():
             eventType = data[i]['type']
 
             match eventType:
-                case "IssuesEvent":
-                    action = data[i]['payload']['action']
-                    print(f"{action} an issue in {repo}")
                 case "PushEvent":
                     print(f"pushed changes to {repo}")
                 case "PullRequestEvent":
                     print(f"made a pull request to {repo}")
+                case "WatchEvent":
+                    print(f"watching {repo}")
+                case "ForkEvent":
+                    print(f"forked {repo}")
+                case "IssuesEvent":
+                    action = data[i]['payload']['action']
+                    print(f"{action} an issue in {repo}")
+                case "IssueCommentEvent":
+                    title = data[i]['payload']['issue']['title']
+                    print(f"commented on issue '{title}'")
                 case "CreateEvent":
                     ref = data[i]['payload']['ref']
                     refType = data[i]['payload']['ref_type']
@@ -35,13 +42,8 @@ def parse_data():
                     refType = data[i]['payload']['ref_type']
                     if refType == "branch":
                         print(f"deleted the {refType} named {ref}")
-                case "IssueCommentEvent":
-                    title = data[i]['payload']['issue']['title']
-                    print(f"commented on issue '{title}'")
-                case "WatchEvent":
-                    print(f"watching {repo}")
-                case "ForkEvent":
-                    print(f"forked {repo}")
+                
+                
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
