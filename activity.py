@@ -4,6 +4,8 @@ import sys
 
 def fetch_url(url):
     response = requests.get(url)
+    if len(response.json()) == 0:
+        return 1
     with open("response.json", "w") as file:
         json.dump(response.json(), file)
 
@@ -11,36 +13,46 @@ def parse_data():
     with open("response.json") as file:
         data = json.load(file)
 
-        for i in range(10):
-            user = data[i]['actor']['login']
+        for i in range(9):
             repo = data[i]['repo']['name']
             eventType = data[i]['type']
-            print(f"[{eventType}]")
 
             match eventType:
                 case "IssuesEvent":
                     action = data[i]['payload']['action']
-                    print(f"{user} {action} an issue in {repo}")
+                    print(f"{action} an issue in {repo}")
                 case "PushEvent":
-                    print(f"{user} pushed changes to {repo}")
+                    print(f"pushed changes to {repo}")
                 case "PullRequestEvent":
-                    print(f"{user} made a pull request to {repo}")
+                    print(f"made a pull request to {repo}")
                 case "CreateEvent":
                     ref = data[i]['payload']['ref']
                     refType = data[i]['payload']['ref_type']
                     if refType == "branch":
-                        print(f"{user} created a {refType} named {ref}")
+                        print(f"created a {refType} named {ref}")
                 case "DeleteEvent":
                     ref = data[i]['payload']['ref']
                     refType = data[i]['payload']['ref_type']
                     if refType == "branch":
-                        print(f"{user} deleted the {refType} named {ref}")
+                        print(f"deleted the {refType} named {ref}")
+                case "IssueCommentEvent":
+                    title = data[i]['payload']['issue']['title']
+                    print(f"commented on issue '{title}'")
+                case "WatchEvent":
+                    print(f"watching {repo}")
+                case "ForkEvent":
+                    print(f"forked {repo}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("No link provided")
+        print("Provide a valid username")
         exit(1)
-    url = sys.argv[1]
-    fetch_url(url)
-    parse_data()
+    username = sys.argv[1]
+    url = "https://api.github.com/users/{}/events".format(username)
+    
+    if fetch_url(url) == 1:
+        print("Invalid Username") 
+    else:
+        print("[RECENT GITHUB ACTIVITY OF " + username + "]\n")
+        parse_data()
     
